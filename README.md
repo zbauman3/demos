@@ -4,7 +4,7 @@ This demonstrates how `@vanilla-extract/babel-plugin-debug-ids` fails to generat
 
 To trigger the issue, run `yarn install && yarn dev` and visit http://localhost:3000. Next.js will give an error in the console showing that there is a mismatch from the server rendered code and the client rendered code.
 
-The code generated for the server will correctly generate the debug id as `theme_systemStylesClass__XXXXXXXX`. The code generated on for client however will generate a debug id of `theme_ref__XXXXXXXX`. This means that the generated style sheet has a different class than the class that is applied to the element, causing styles to fail.
+The code generated for the server will correctly generate the debug id as `theme_systemStylesClass__XXXXXXXX`. The code generated on for client however will generate a debug id of `theme_ref__XXXXXXXX`. This means that the generated style sheet has a different class than the class that is applied to the element, causing styles to fail and a Next.js client/server mismatch.
 
 The issue involves [this section](https://github.com/vanilla-extract-css/vanilla-extract/blob/9312b66e5bd67942b7929a6b93e0ad2181b2e0ba/packages/babel-plugin-debug-ids/src/index.ts#L77-L99) in `@vanilla-extract/babel-plugin-debug-ids` that is responsible for handling a specific export format of `createTheme`. This code only handles one scenario:
 
@@ -44,5 +44,9 @@ var ref = _slicedToArray(createTheme({}), 2),
   vars = ref[1];
 export { themeClass, vars };
 ```
+
+---
+
+I believe this issue arrose in `@vanilla-extract/integration@6.0.0` as part of the removal of `@vanilla-extract/babel-plugin` in [#827](https://github.com/vanilla-extract-css/vanilla-extract/pull/827). I'm not exactly sure what is causing the compiled code to change structure though, potentially something in Next.js' SWC compilation process?
 
 TL;DR: `@vanilla-extract/babel-plugin-debug-ids` needs to be updated to handle a wider range of scenarios for `createTheme`.
